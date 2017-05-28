@@ -28,7 +28,7 @@ for peak in rPeaks[1:(len(rPeaks))]:
 
 #Calculate median heartbeat template
 templatesForCorrCoef = ecgOut[4]
-templates = templatesForCorrCoef[-10:-1]
+templates = templatesForCorrCoef
 medianTemplate = [x / len(templates) for x in [sum(x) for x in zip(*templates)]]
 
 #Calculate correlation coeffcients
@@ -59,12 +59,13 @@ for peak in rrTachogram:
 
 
 
-#frequency, power = LombScargle(tPeaks, rrTachogramAfterSqi).autopower()
-#power = np.convolve(power, np.ones(20)/20)
-#power = power[0:(len(frequency))]
-#plt.plot(frequency, power)
-#plt.xlim(0, 0.4)
-#plt.ylim(0, 0.01)
-#plt.show()
-plt.plot(tPeaks, rrTachogramAfterSqi)
+frequency, power = LombScargle(tPeaks, rrTachogramAfterSqi).autopower()
+smaFactor = 300
+power = np.convolve(power, np.ones(smaFactor)/smaFactor)
+power = power[0:(len(frequency))]
+plt.plot(frequency, power)
+plt.xlim(0, 0.004)
+plt.ylim(0, 0.05)
 plt.show()
+#plt.plot(tPeaks, rrTachogramAfterSqi)
+#plt.show()
