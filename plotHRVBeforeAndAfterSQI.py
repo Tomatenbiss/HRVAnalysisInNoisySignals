@@ -1,16 +1,17 @@
-import sys
 from biosppy.signals import ecg
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats.stats import pearsonr
 from astropy.stats import LombScargle
+from scipy.signal import spectral
+import sys
 
+#Getting the data
 if len(sys.argv) != 3:
-	print("Bitte Datei mit dem zu analysierenden Signal angeben!")
+	print("Bitte Datei mit dem zu analysierenden Signal sowie einen Grenzwert angeben!")
 else:
 	f = open(sys.argv[1], "r")
 	th = float(sys.argv[2])
-	
 
 dataEcg = []
 for line in f:
@@ -48,17 +49,27 @@ for peak in rrTachogram:
 		if corrCoeffs[cnt - 1] >= th:
 			rrTachogramAfterSqi.append(peak)
 			tPeaks.append(rPeaks[cnt])
+	else:
+		rrTachogramAfterSqi.append(None)
+		tPeaks.append(rPeaks[cnt])
 	cnt = cnt + 1;
 
 
-def movingaverage (values, window):
-    weights = np.repeat(1.0, window)/window
-    sma = np.convolve(values, weights, 'valid')
-    return sma
 
-freq = np.linspace(0, 0.4, 10000)
-power = LombScargle(tPeaks, rrTachogramAfterSqi).power(freq)
-power = movingaverage(power, 1000)
-freq = np.linspace(0, 0.4, len(power))
-plt.plot(freq, power)
+
+fig = plt.figure()
+axRaw = fig.add_subplot(311)
+axRaw.plot(rPeaks[1:len(rPeaks)], rrTachogram)
+
+axAfterSQI = fig.add_subplot(312)
+axAfterSQI.plot(tPeaks[3:len(tPeaks)], rrTachogramAfterSqi[3:len(rrTachogramAfterSqi)])
+
+
+axAfterSQI = fig.add_subplot(313)
+axAfterSQI.plot(rPeaks, corrCoeffs)
+
 plt.show()
+
+
+#plt.plot(tPeaks, rrTachogramAfterSqi)
+#plt.show()
