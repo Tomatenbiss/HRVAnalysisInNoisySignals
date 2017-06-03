@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats.stats import pearsonr
 from astropy.stats import LombScargle
+from scipy.signal import spectral
 
 #Getting the data
 f = open("sampleDataEcgEda.txt", "r")
@@ -48,6 +49,9 @@ for peak in rrTachogram:
 		tPeaks.append(rPeaks[cnt])
 	cnt = cnt + 1;
 
+
+freq = np.linspace(0, 0.4, 1000)
+
 #rrTachogramAfterSqi = []
 #cnt = 1
 #for peak in rrTachogram:
@@ -56,16 +60,30 @@ for peak in rrTachogram:
 #	else:
 #		rrTachogramAfterSqi.append(None)
 #	cnt = cnt + 1
+def movingaverage (values, window):
+    weights = np.repeat(1.0, window)/window
+    sma = np.convolve(values, weights, 'valid')
+    return sma
 
-
-
-frequency, power = LombScargle(tPeaks, rrTachogramAfterSqi).autopower()
-smaFactor = 300
-power = np.convolve(power, np.ones(smaFactor)/smaFactor)
-power = power[0:(len(frequency))]
-plt.plot(frequency, power)
-plt.xlim(0, 0.004)
-plt.ylim(0, 0.05)
+freq = np.linspace(0, 0.4, 500)
+power = LombScargle(tPeaks, rrTachogramAfterSqi).power(freq)
+VLF = 0
+LF = 0
+HF = 0
+cnt = 0
+for element in power:
+	if freq[cnt] < 0.15:
+		VLF + = 
+#power = LombScargle(rPeaks[1:len(rPeaks)], rrTachogram).power(freq)
+#smaFactor = 100
+#power = np.convolve(power, np.ones(smaFactor)/smaFactor)
+#power = power[0:(len(frequency))]
+#plt.plot(frequency, power)
+power = movingaverage(power, 150)
+freq = np.linspace(0, 0.4, len(power))
+plt.plot(freq, power)
+#plt.xlim(0, .4)
+#plt.ylim(0, .015)
 plt.show()
 #plt.plot(tPeaks, rrTachogramAfterSqi)
 #plt.show()
