@@ -1,20 +1,19 @@
+import sys
 from biosppy.signals import ecg
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats.stats import pearsonr
 from astropy.stats import LombScargle
-from scipy.signal import spectral
 
-#Getting the data
-fOut = open("RRTachogram.txt", "w")
-f = open("sampleDataEcgEda.txt", "r")
+if len(sys.argv) != 2:
+	print("Bitte Datei mit dem zu analysierenden Signal angeben!")
+else:
+	f = open(sys.argv[1], "r")
+
 dataEcg = []
-
 for line in f:
-	lineValues = line.split(",")
-	dataEcg.append(float(lineValues[1]))
-
-
+	lineValues = line.split()
+	dataEcg.append(float(lineValues[2]))
 
 #Perform QRS detection
 ecgOut = ecg.ecg(signal=dataEcg, sampling_rate=1000., show=False)
@@ -26,6 +25,7 @@ prevPeak = rPeaks[0]
 for peak in rPeaks[1:(len(rPeaks))]:
 	rrTachogram.append(peak - prevPeak)
 	prevPeak = peak
+
 
 #Calculate median heartbeat template
 templatesForCorrCoef = ecgOut[4]
@@ -49,40 +49,16 @@ for peak in rrTachogram:
 		tPeaks.append(rPeaks[cnt])
 	cnt = cnt + 1;
 
-
 freq = np.linspace(0, 0.4, 1000)
 
-#rrTachogramAfterSqi = []
-#cnt = 1
-#for peak in rrTachogram:
-#	if corrCoeffs[cnt] >= 0.9:
-#		rrTachogramAfterSqi.append(peak)
-#	else:
-#		rrTachogramAfterSqi.append(None)
-#	cnt = cnt + 1
 def movingaverage (values, window):
     weights = np.repeat(1.0, window)/window
     sma = np.convolve(values, weights, 'valid')
     return sma
 
-freq = np.linspace(0, 0.4, 500)
+freq = np.linspace(0, 0.4, 10000)
 power = LombScargle(tPeaks, rrTachogramAfterSqi).power(freq)
-VLF = 0
-LF = 0
-HF = 0
-cnt = 0
-
-	
-#power = LombScargle(rPeaks[1:len(rPeaks)], rrTachogram).power(freq)
-#smaFactor = 100
-#power = np.convolve(power, np.ones(smaFactor)/smaFactor)
-#power = power[0:(len(frequency))]
-#plt.plot(frequency, power)
-power = movingaverage(power, 150)
+power = movingaverage(power, 1000)
 freq = np.linspace(0, 0.4, len(power))
 plt.plot(freq, power)
-#plt.xlim(0, .4)
-#plt.ylim(0, .015)
 plt.show()
-#plt.plot(tPeaks, rrTachogramAfterSqi)
-#plt.show()
