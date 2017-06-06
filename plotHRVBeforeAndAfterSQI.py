@@ -48,12 +48,11 @@ for peak in rrTachogram:
 	if corrCoeffs[cnt] >= th:
 		if corrCoeffs[cnt - 1] >= th:
 			rrTachogramAfterSqi.append(peak)
-			tPeaks.append(rPeaks[cnt])
+			tPeaks.append(float(rPeaks[cnt] / 1000))
 	else:
 		rrTachogramAfterSqi.append(None)
 		tPeaks.append(rPeaks[cnt])
 	cnt = cnt + 1;
-
 
 
 

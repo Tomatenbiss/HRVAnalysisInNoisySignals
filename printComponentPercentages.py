@@ -51,14 +51,75 @@ for peak in rrTachogram:
 	cnt = cnt + 1;
 
 
-def movingaverage (values, window):
-    weights = np.repeat(1.0, window)/window
-    sma = np.convolve(values, weights, 'valid')
-    return sma
 
-freq = np.linspace(0, 0.4, 10000)
+
+freq = np.linspace(0, 0.04, 100000)
 power = LombScargle(tPeaks, rrTachogramAfterSqi).power(freq)
-power = movingaverage(power, 1000)
-freq = np.linspace(0, 0.4, len(power))
-plt.plot(freq, power)
-plt.show()
+componentAvg = 0
+n = 0
+for point in power:
+	if not np.isnan(point):
+		if not np.isinf(point):
+			componentAvg = componentAvg + point
+			n = n + 1
+print("VLF: " + str(componentAvg))
+
+freq = np.linspace(0.04, 0.15, 100000)
+power = LombScargle(tPeaks, rrTachogramAfterSqi).power(freq)
+componentAvg = 0
+n = 0
+for point in power:
+	if not np.isnan(point):
+		if not np.isinf(point):
+			componentAvg = componentAvg + point
+			n = n + 1
+print("LF: " + str(componentAvg))
+lf = componentAvg
+
+freq = np.linspace(0.15, 0.4, 100000)
+power = LombScargle(tPeaks, rrTachogramAfterSqi).power(freq)
+componentAvg = 0
+n = 0
+for point in power:
+	if not np.isnan(point):
+		if not np.isinf(point):
+			componentAvg = componentAvg + point
+			n = n + 1
+print("HF: " + str(componentAvg))
+
+print("HF to LF: " + str(lf / componentAvg))
+
+freq = np.linspace(0, 0.04, 100000)
+power = LombScargle(rPeaks[1:len(rPeaks)], rrTachogram).power(freq)
+componentAvg = 0
+n = 0
+for point in power:
+	if not np.isnan(point):
+		if not np.isinf(point):
+			componentAvg = componentAvg + point
+			n = n + 1
+print("RAWVLF: " + str(componentAvg))
+
+freq = np.linspace(.04, 0.15, 100000)
+power = LombScargle(rPeaks[1:len(rPeaks)], rrTachogram).power(freq)
+componentAvg = 0
+n = 0
+for point in power:
+	if not np.isnan(point):
+		if not np.isinf(point):
+			componentAvg = componentAvg + point
+			n = n + 1
+print("RAWLF: " + str(componentAvg))
+lf = componentAvg
+
+freq = np.linspace(0.15, 0.4, 100000)
+power = LombScargle(rPeaks[1:len(rPeaks)], rrTachogram).power(freq)
+componentAvg = 0
+n = 0
+for point in power:
+	if not np.isnan(point):
+		if not np.isinf(point):
+			componentAvg = componentAvg + point
+			n = n + 1
+print("RAWHF: " + str(componentAvg))
+print("RAW HF to LF: " + str(lf / componentAvg))

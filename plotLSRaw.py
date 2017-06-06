@@ -33,9 +33,37 @@ def movingaverage (values, window):
     sma = np.convolve(values, weights, 'valid')
     return sma
 
-freq = np.linspace(0, 0.4, 10000)
-power = LombScargle(rPeaks[1:len(rPeaks)], rrTachogram).power(freq)
-power = movingaverage(power, 1000)
-freq = np.linspace(0, 0.4, len(power))
+
+
+rPeaks /= 1000
+ls = LombScargle(rPeaks[1:len(rPeaks)], rrTachogram)
+freq, power = ls.autopower(minimum_frequency=0, maximum_frequency=.4, normalization='psd')
+
+freqVlf, powerVlf = ls.autopower(minimum_frequency=0, maximum_frequency=.04, normalization='psd')
+freqLf, powerLf = ls.autopower(minimum_frequency=0.04, maximum_frequency=.15, normalization='psd')
+freqHf, powerHf = ls.autopower(minimum_frequency=.15, maximum_frequency=.4, normalization='psd')
+
+
+print(powerVlf)
+vlf = 0
+lf = 0
+hf = 0
+for point in powerVlf[1:len(powerVlf)]:
+	if not point == float('nan') and not point == float('inf'):
+		vlf += point
+for point in powerLf:
+	if not point == float('nan') and not point == float('inf'):
+		lf += point
+for point in powerHf:
+	if not point == float('nan') and not point == float('inf'):
+		hf += point
+print("VLF: " + str(vlf) + "LF: " + str(lf) + ", HF: " + str(hf) + ", RATIO LF/HF: " + str(lf/hf))
+
+
+
+#freq = np.linspace(0, 0.4, 10000)
+#power = LombScargle(rPeaks[1:len(rPeaks)], rrTachogram).power(freq)
+#power = movingaverage(power, 1000)
+#freq = np.linspace(0, 0.4, len(power))
 plt.plot(freq, power)
 plt.show()
