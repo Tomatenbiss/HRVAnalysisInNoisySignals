@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 from scipy.stats.stats import pearsonr
 from astropy.stats import LombScargle
 import math
+from random import randint
 
 f = open(sys.argv[1], "r")
-th = float(sys.argv[2])
 
 def getEcgDataFromFile(file=f, delimiter="", positionInCsvFile=2):
 	dataEcg = []
@@ -18,6 +18,13 @@ def getEcgDataFromFile(file=f, delimiter="", positionInCsvFile=2):
 
 def getEcgSignal(file=f, delimiter="", positionInCsvFile=2):
 	return ecg.ecg(signal=getEcgDataFromFile(), sampling_rate=1000., show=False)
+
+th = float(sys.argv[2])
+percenteageForFakeCoeffs = int(sys.argv[3])
+ecgSignal = getEcgSignal()
+
+
+
 
 def plotEcgSignal(file=f, delimiter="", positionInCsvFile=2):
 	return ecg.ecg(signal=getEcgDataFromFile(), sampling_rate=1000., show=True)
@@ -42,7 +49,6 @@ def getCorrelationCoefficients(templatesForCorrCoef, medianTemplate):
 	return corrCoeffs
 
 def getRRTachogramAfterSQI(rrTachogram, corrCoeffs, rPeaks):
-	print(rPeaks)
 	rrTachogramAfterSqi = []
 	tPeaks = []
 	cnt = 1
@@ -97,8 +103,56 @@ def plotLombScarglePeriodogram():
 	#plot(freq, power)
 
 
+def createFakeCorrelationCoefficients(nBeats, percenteage):
+	fakeBeats = nBeats * percenteage / 100
+	fakeCorrCoeffs = [1] * nBeats
+	while checkIfPercenteageReached(fakeCorrCoeffs, percenteage) == False:
+		randPos = randint(0, len(fakeCorrCoeffs) - 1)
+		fakeCorrCoeffs[randPos] = 0	
+	return fakeCorrCoeffs
 
-plotLombScarglePeriodogram()
+def checkIfPercenteageReached(lst, percenteage):
+	zeros = 0
+	for item in lst:
+		if item == 0:
+			zeros += 1
+	if float(zeros) / len(lst) * 100 >= percenteage:
+		return True
+	else:
+		return False
+
+def plotLombScarglePeriodogramWithFakeCorrelationCoefficients(percenteage):	
+	rPeaks = ecgSignal[2]
+	(rPeaks,rrTachogram) = getRRTachogram(rPeaks)
+	medianTemplate = getMedianHeartbeatTemplate(ecgSignal[4])
+	corrCoeffs = createFakeCorrelationCoefficients(len(ecgSignal[4]), percenteage)
+	(tPeaks, rrTachogramAfterSqi) = getRRTachogramAfterSQI(rrTachogram, corrCoeffs, rPeaks)
+	(freq, power) = getLombScarglePeriodogram(tPeaks, rrTachogramAfterSqi)
+	return getRatioHFLF(tPeaks, rrTachogramAfterSqi)
+	
+
+
+def getAverageRatioHFLF(nTimes, percenteage):
+	cnt = 0
+	avgSum = .0
+	minVal = 1000.0
+	maxVal = .0
+	while cnt < nTimes:
+		ratio = float(plotLombScarglePeriodogramWithFakeCorrelationCoefficients(percenteageForFakeCoeffs))
+		avgSum += ratio
+		if ratio < minVal:
+			minVal = ratio
+		if ratio > maxVal:
+			maxVal = ratio
+		cnt += 1
+	avgSum /= nTimes
+	print("Average: " + str(avgSum) + ", MIN: " + str(minVal) + ", MAX: " + str(maxVal))
+		
+
+
+getAverageRatioHFLF(100, percenteageForFakeCoeffs)
+#createFakeCorrelationCoefficients(20, 11)
+#plotLombScarglePeriodogram()
 #plotEcgSignal()
 
 
