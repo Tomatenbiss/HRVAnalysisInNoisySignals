@@ -88,12 +88,13 @@ def movingaverage (values, window):
     sma = np.convolve(values, weights, 'valid')
     return sma
 
-def getLombScarglePeriodogram(peaks, tachogram, minFreq=0, maxFreq=.4, norm='psd'):
+def getLombScarglePeriodogram(peaks, tachogram, minFreq=0, maxFreq=.4, norm='standard'):
 	ls = LombScargle(peaks, tachogram)
 	freq, power = ls.autopower(minimum_frequency=minFreq, maximum_frequency=maxFreq, normalization=norm)
+	print(sumWithNan(power))
 	return (freq, power)
 
-def getPower(tPeaks, rrTachogramAfterSqi, minFreq=0, maxFreq=.4, norm='psd'):
+def getPower(tPeaks, rrTachogramAfterSqi, minFreq=0, maxFreq=.4, norm='standard'):
 	component = 0
 	power = getLombScarglePeriodogram(tPeaks, rrTachogramAfterSqi, minFreq, maxFreq, norm)[1]
 	return sumWithNan(power)
@@ -125,8 +126,6 @@ def plotLombScarglePeriodogram():
 	medianTemplate = getMedianHeartbeatTemplate(ecgSignal[4])
 	corrCoeffs = getCorrelationCoefficients(ecgSignal[4],medianTemplate)
 	(tPeaks, rrTachogramAfterSqi) = getRRTachogramAfterSQI(rrTachogram, corrCoeffs, rPeaks)
-	print(tPeaks)
-	print(rrTachogramAfterSqi)
 	(freq, power) = getLombScarglePeriodogram(tPeaks, rrTachogramAfterSqi)
 
 	#print(getRatioHFLF(tPeaks, rrTachogramAfterSqi))
@@ -142,8 +141,6 @@ def plotLombScarglePeriodogramRaw():
 	rPeaks = rPeaks.tolist()
 	for peak in rPeaks:
 		rPeaksCorrected.append(float(float(peak) / 1000))
-	print(rPeaksCorrected)
-	print(rrTachogram)
 	(freq, power) = getLombScarglePeriodogram(rPeaksCorrected[1:len(rPeaks)], rrTachogram)
 	#print(getRatioHFLF(tPeaks, rrTachogramAfterSqi))
 	plot(freq, power)
