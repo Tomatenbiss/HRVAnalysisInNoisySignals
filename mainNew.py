@@ -67,7 +67,6 @@ def getRRTachogramAfterSQI(rrTachogram, corrCoeffs, rPeaks):
 	return (tPeaks, rrTachogramAfterSqi)
 
 def getRRTachogramAfterSQIWithNones(rrTachogram, corrCoeffs, rPeaks):
-	print(rPeaks)
 	rrTachogramAfterSqi = []
 	tPeaks = []
 	cnt = 1
@@ -75,12 +74,14 @@ def getRRTachogramAfterSQIWithNones(rrTachogram, corrCoeffs, rPeaks):
 		if corrCoeffs[cnt] >= th:
 			if corrCoeffs[cnt - 1] >= th:
 				rrTachogramAfterSqi.append(peak)
-				tPeaks.append(float(rPeaks[cnt] / 1000))
+				tPeaks.append(float(float(rPeaks[cnt]) / 1000))
 			else:
 				rrTachogramAfterSqi.append(None)
-				tPeaks.append(float(rPeaks[cnt] / 1000))
+				tPeaks.append(float(float(rPeaks[cnt]) / 1000))
+		else:
+			rrTachogramAfterSqi.append(None)
+			tPeaks.append(float(float(rPeaks[cnt]) / 1000))
 		cnt = cnt + 1
-		
 	return (tPeaks, rrTachogramAfterSqi)
 
 def movingaverage (values, window):
@@ -221,12 +222,43 @@ def plotRRTachogram():
 	plot(rPeaks[1:len(rPeaks)], rrTachogram)
 
 def plotRRTachogramAfterSQIWithNones():
+	print("WTF")
 	rPeaks = ecgSignal[2]
 	(rPeaks,rrTachogram) = getRRTachogram(rPeaks)
 	medianTemplate = getMedianHeartbeatTemplate(ecgSignal[4])
 	corrCoeffs = getCorrelationCoefficients(ecgSignal[4],medianTemplate)
 	(tPeaks, rrTachogramAfterSqi) = getRRTachogramAfterSQIWithNones(rrTachogram, corrCoeffs, rPeaks)
 	plot(tPeaks, rrTachogramAfterSqi)
+
+def getROCValue():
+	rPeaks = ecgSignal[2]
+	(rPeaks,rrTachogram) = getRRTachogram(rPeaks)
+	medianTemplate = getMedianHeartbeatTemplate(ecgSignal[4])
+	corrCoeffs = getCorrelationCoefficients(ecgSignal[4],medianTemplate)
+	(tPeaks, rrTachogramAfterSqi) = getRRTachogramAfterSQIWithNones(rrTachogram, corrCoeffs, rPeaks)
+	f = open("falsePositives", "r")
+	annotations = []
+	for line in f:
+		items = line.split()
+		annotations.append(items[1])
+	
+	
+	TP = 0
+	FP = 0
+	cnt = 0
+	for peak in tPeaks:
+		sqiResult = rrTachogramAfterSqi[cnt]
+		annotation = annotations[cnt]
+		if sqiResult != None:
+			if annotation == 'P':
+				TP += 1
+			else:
+				FP += 1
+		cnt += 1
+	print("TP: " + str(TP) + ", FP: " + str(FP))
+
+		
+getROCValue()
 
 def plotPlainEcgSignal():
 	x = []
@@ -244,4 +276,5 @@ def plotPlainEcgSignal():
 #createFakeCorrelationCoefficients(20, 11)
 #plotLombScarglePeriodogram()
 #plotLombScarglePeriodogramRaw()
-plotEcgSignal()
+#plotEcgSignal()
+

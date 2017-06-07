@@ -1,13 +1,3 @@
-Überlegungen zur Implementierung der ROC Analyse
-
-TP to FP Ratio ist von Interesse
-Akzeptiere ich keine Ergebnisse: Keine FP und Keine TP (0,0)
-Akzeptiere ich alle Ergebnisse: Alle FP und Alle TP (1,1)
-Bekannt sein muss also das Signal -> QRS Detection -> Anzahl korrekter Peaks sowie falscher Peaks
-
-
-
-Detected Peaks:
 640		P
 1427	P
 2225	P
